@@ -16,18 +16,27 @@ A fast and beautiful command-line tool for counting lines of code across multipl
 
 ## Installation
 
+### Download Pre-built Binaries
+
+Download the latest release for your platform from the [releases page](https://github.com/jotrorox/locc/releases/latest):
+
+- **Linux (x86_64)**: `locc-*-linux-amd64.tar.gz`
+- **Linux (ARM64)**: `locc-*-linux-arm64.tar.gz`
+- **Windows (x86_64)**: `locc-*-windows-amd64.zip`
+- **Windows (ARM64)**: `locc-*-windows-arm64.zip`
+
+### Using Go Install
+
+```bash
+go install github.com/jotrorox/locc@latest
+```
+
 ### From Source
 
 ```bash
 git clone https://github.com/jotrorox/locc.git
 cd locc
 go build -o locc main.go
-```
-
-### Using Go Install
-
-```bash
-go install github.com/jotrorox/locc@latest
 ```
 
 ## Usage
@@ -54,27 +63,25 @@ locc -f /path/to/your/project
 
 **Type mode (default):**
 ```
-Scanning: /home/user/my-project
+Scanning: ./my-project
 ──────────────────────────────────────
 Go                             5 files    234 lines
 JavaScript                     3 files    156 lines
 TypeScript                     2 files     89 lines
-JSON                           1 files     12 lines
 ──────────────────────────────────────
 Total                         11 files    491 lines
 ```
 
 **File mode:**
 ```
-Scanning: /home/user/my-project
+Scanning: ./my-project
 ──────────────────────────────────────
 src/main.go                              234
-src/utils.js                             89
-src/types.ts                             67
-config.json                              12
+src/app.js                               156
+src/types.ts                             89
 ──────────────────────────────────────
-Total                                   402
-Files: 4
+Total                                   479
+Files: 3
 ```
 
 ## Supported Languages
@@ -99,6 +106,14 @@ LOCC is optimized for speed:
 - **Pre-allocated slices** to reduce memory allocations
 - **Smart path handling** without unnecessary string operations
 
+## Releases
+
+New releases are automatically built and published when a new tag is created. Each release includes:
+
+- Pre-built binaries for Linux and Windows (both x86_64 and ARM64)
+- SHA256 checksums for verification
+- Source code archives
+
 ## Contributing
 
 We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to contribute to this project.
@@ -117,7 +132,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Author
 
-Created by Johannes (Jotrorox) Müller
+**Johannes (Jotrorox) Müller**
+- GitHub: [@jotrorox](https://github.com/jotrorox)
+- Email: [jotrorox@protonmail.com](mailto:jotrorox@protonmail.com)
 
 ---
 
