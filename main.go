@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"strconv"
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
@@ -31,11 +30,9 @@ var (
 
 // File type information
 type FileTypeInfo struct {
-	Name       string
-	Extensions []string
-	Files      int
-	Lines      int
-	FileList   []FileInfo
+	Name  string
+	Files int
+	Lines int
 }
 
 type FileInfo struct {
@@ -111,8 +108,8 @@ func main() {
 }
 
 func showFileMode(path string) {
+	var files []FileInfo
 	totalLines := 0
-	fileCount := 0
 
 	fmt.Printf("%s %s\n", headerStyle.Render("Scanning:"), path)
 	fmt.Printf("%s\n", headerStyle.Render("──────────────────────────────────────"))
@@ -137,18 +134,9 @@ func showFileMode(path string) {
 			return nil
 		}
 
-		relPath := strings.TrimPrefix(filePath, path)
-		relPath = strings.TrimPrefix(relPath, "/")
-		if relPath == "" {
-			relPath = filepath.Base(filePath)
-		}
-
-		fmt.Printf("%-50s %s\n",
-			fileStyle.Render(relPath),
-			lineStyle.Render(fmt.Sprintf("%6d", lines)))
-
+		relPath := getRelativePath(filePath, path)
+		files = append(files, FileInfo{Path: relPath, Lines: lines})
 		totalLines += lines
-		fileCount++
 
 		return nil
 	})
@@ -158,11 +146,23 @@ func showFileMode(path string) {
 		os.Exit(1)
 	}
 
+	// Sort files by line count (descending) for better overview
+	sort.Slice(files, func(i, j int) bool {
+		return files[i].Lines > files[j].Lines
+	})
+
+	// Display results
+	for _, file := range files {
+		fmt.Printf("%-50s %s\n",
+			fileStyle.Render(file.Path),
+			lineStyle.Render(fmt.Sprintf("%6d", file.Lines)))
+	}
+
 	fmt.Printf("%s\n", headerStyle.Render("──────────────────────────────────────"))
 	fmt.Printf("%-50s %s\n",
 		totalStyle.Render("Total"),
 		totalStyle.Render(fmt.Sprintf("%6d", totalLines)))
-	fmt.Printf("Files: %s\n", totalStyle.Render(strconv.Itoa(fileCount)))
+	fmt.Printf("Files: %s\n", totalStyle.Render(fmt.Sprintf("%d", len(files))))
 }
 
 func showTypeMode(path string) {
@@ -194,26 +194,15 @@ func showTypeMode(path string) {
 			return nil
 		}
 
+		// Initialize file type info if not exists
 		if fileTypes[typeName] == nil {
 			fileTypes[typeName] = &FileTypeInfo{
-				Name:     typeName,
-				FileList: make([]FileInfo, 0),
+				Name: typeName,
 			}
-		}
-
-		relPath := strings.TrimPrefix(filePath, path)
-		relPath = strings.TrimPrefix(relPath, "/")
-		if relPath == "" {
-			relPath = filepath.Base(filePath)
 		}
 
 		fileTypes[typeName].Files++
 		fileTypes[typeName].Lines += lines
-		fileTypes[typeName].FileList = append(fileTypes[typeName].FileList, FileInfo{
-			Path:  relPath,
-			Lines: lines,
-		})
-
 		totalLines += lines
 		totalFiles++
 
@@ -225,11 +214,13 @@ func showTypeMode(path string) {
 		os.Exit(1)
 	}
 
-	// Sort file types by total lines (descending)
-	var sortedTypes []*FileTypeInfo
+	// Pre-allocate slice with known capacity for better performance
+	sortedTypes := make([]*FileTypeInfo, 0, len(fileTypes))
 	for _, typeInfo := range fileTypes {
 		sortedTypes = append(sortedTypes, typeInfo)
 	}
+
+	// Sort file types by total lines (descending)
 	sort.Slice(sortedTypes, func(i, j int) bool {
 		return sortedTypes[i].Lines > sortedTypes[j].Lines
 	})
@@ -256,12 +247,24 @@ func countLinesInFile(filePath string) (int, error) {
 	}
 	defer file.Close()
 
+	// Use larger buffer for better performance on large files
 	scanner := bufio.NewScanner(file)
+	buf := make([]byte, 0, 64*1024) // 64KB buffer
+	scanner.Buffer(buf, 1024*1024)  // 1MB max token size
+
 	lineCount := 0
 
 	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		if line != "" {
+		// Optimized: check for empty line without allocating trimmed string
+		line := scanner.Bytes()
+		hasContent := false
+		for _, b := range line {
+			if b != ' ' && b != '\t' && b != '\r' && b != '\n' {
+				hasContent = true
+				break
+			}
+		}
+		if hasContent {
 			lineCount++
 		}
 	}
@@ -271,4 +274,20 @@ func countLinesInFile(filePath string) (int, error) {
 	}
 
 	return lineCount, nil
+}
+
+// getRelativePath optimally computes relative path
+func getRelativePath(target, base string) string {
+	if !strings.HasPrefix(target, base) {
+		return filepath.Base(target)
+	}
+
+	relPath := target[len(base):]
+	if len(relPath) > 0 && relPath[0] == '/' {
+		relPath = relPath[1:]
+	}
+	if relPath == "" {
+		relPath = filepath.Base(target)
+	}
+	return relPath
 }
