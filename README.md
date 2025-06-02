@@ -10,7 +10,7 @@ A fast and beautiful command-line tool for counting lines of code across multipl
 - 🚀 **Fast**: Optimized scanning with efficient file processing
 - 🎨 **Beautiful**: Colorful terminal output powered by [Charm's Lipgloss](https://github.com/charmbracelet/lipgloss)
 - 📊 **Two modes**: File-by-file view or grouped by language type
-- 🔧 **Multiple languages**: Supports 30+ programming languages
+- 🔧 **Multiple languages**: Supports 90+ programming languages
 - 📈 **Smart counting**: Excludes empty lines and whitespace-only lines
 - 💻 **Cross-platform**: Works on Linux, macOS, and Windows
 
@@ -86,7 +86,7 @@ Files: 3
 
 ## Supported Languages
 
-LOCC supports 30+ programming languages including:
+LOCC supports 90+ programming languages including:
 
 - **Systems**: C, C++, Rust, Go
 - **Web**: JavaScript, TypeScript, HTML, CSS, SCSS
