@@ -1,1 +1,3 @@
 locc
+zig-out
+.zig-cache
