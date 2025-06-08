@@ -1,7 +1,14 @@
 const std = @import("std");
+
 const config_module = @import("config/config.zig");
 const Config = config_module.Config;
 const ConfigError = config_module.ConfigError;
+const ProgramConfig = config_module.ProgramConfig;
+const ProgramAuthor = config_module.ProgramAuthor;
+
+const cli = @import("./cli/cli.zig");
+const Command = @import("./cli/command.zig").Command;
+const HelpCommand = @import("./cli/commands/help.zig").HelpCommand;
 
 fn parseDir(allocator: std.mem.Allocator, path: []const u8, config: *const Config) !void {
     var dir = try std.fs.cwd().openDir(path, .{ .iterate = true });
@@ -36,6 +43,8 @@ fn parseDir(allocator: std.mem.Allocator, path: []const u8, config: *const Confi
     }
 }
 
+const CurrentProgramConfig = ProgramConfig.init("LOCC", "0.2.0", &[_]ProgramAuthor{ProgramAuthor.init("Johannes (Jotrorox) Müller", "mail@jotrorox.com")});
+
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     defer _ = gpa.deinit();
@@ -52,12 +61,19 @@ pub fn main() !void {
     };
     defer config.deinit(allocator);
 
-    var argIter = std.process.ArgIterator.init();
-    defer argIter.deinit();
+    const commands = [_]Command{
+        HelpCommand,
+    };
 
-    _ = argIter.next();
+    const cli_config = cli.CLI{
+        .pConfig = CurrentProgramConfig,
+        .commands = &commands,
+    };
+    const cli_data = try cli_config.parse();
 
-    const path = argIter.next() orelse ".";
+    if (cli_data.help) {
+        return try HelpCommand.run(&[_][]const u8{});
+    }
 
-    try parseDir(allocator, path, &config);
+    try parseDir(allocator, ".", &config);
 }
