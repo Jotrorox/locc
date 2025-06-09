@@ -3,7 +3,7 @@
     .version = "0.2.0",
 
     .fingerprint = 0x8954133c27087e03,
-    .minimum_zig_version = "0.14.0",
+    .minimum_zig_version = "0.14.1",
 
     .paths = .{
         "build.zig",
