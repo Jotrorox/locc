@@ -1,42 +1,26 @@
 # LOCC - Lines of Code Counter
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Go Version](https://img.shields.io/badge/Go-1.24+-blue.svg)](https://golang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge&logoColo=white)](https://opensource.org/licenses/MIT)
+[![Zig](https://img.shields.io/badge/Zig-%23F7A41D.svg?style=for-the-badge&logo=zig&logoColor=white)](https://ziglang.org)
 
 A fast and beautiful command-line tool for counting lines of code across multiple programming languages with colorful terminal output.
 
 ## Features
 
-- 🚀 **Fast**: Optimized scanning with efficient file processing
-- 🎨 **Beautiful**: Colorful terminal output powered by [Charm's Lipgloss](https://github.com/charmbracelet/lipgloss)
-- 📊 **Two modes**: File-by-file view or grouped by language type
-- 🔧 **Multiple languages**: Supports 90+ programming languages
-- 📈 **Smart counting**: Excludes empty lines and whitespace-only lines
-- 💻 **Cross-platform**: Works on Linux, macOS, and Windows
+> Written in zig ... but just kidding this will be filled out soon :)
 
 ## Installation
 
 ### Download Pre-built Binaries
 
-Download the latest release for your platform from the [releases page](https://github.com/jotrorox/locc/releases/latest):
-
-- **Linux (x86_64)**: `locc-*-linux-amd64.tar.gz`
-- **Linux (ARM64)**: `locc-*-linux-arm64.tar.gz`
-- **Windows (x86_64)**: `locc-*-windows-amd64.zip`
-- **Windows (ARM64)**: `locc-*-windows-arm64.zip`
-
-### Using Go Install
-
-```bash
-go install github.com/jotrorox/locc@latest
-```
+todo with the next minor release
 
 ### From Source
 
 ```bash
 git clone https://github.com/jotrorox/locc.git
 cd locc
-go build -o locc main.go
+zig build --release=small
 ```
 
 ## Usage
@@ -45,48 +29,28 @@ go build -o locc main.go
 
 Count lines of code in a directory, grouped by file type:
 
+> This will be implemented soon again
+
 ```bash
-locc /path/to/your/project
+# todo
 ```
 
 ### File Mode
 
-Show individual files instead of grouping by type:
+Show the file count, grouped by file type:
 
 ```bash
 locc --file-mode /path/to/your/project
 # or
 locc -f /path/to/your/project
-```
 
-### Examples
-
-**Type mode (default):**
-```
-Scanning: ./my-project
-──────────────────────────────────────
-Go                             5 files    234 lines
-JavaScript                     3 files    156 lines
-TypeScript                     2 files     89 lines
-──────────────────────────────────────
-Total                         11 files    491 lines
-```
-
-**File mode:**
-```
-Scanning: ./my-project
-──────────────────────────────────────
-src/main.go                              234
-src/app.js                               156
-src/types.ts                             89
-──────────────────────────────────────
-Total                                   479
-Files: 3
+# But since it is the default currently you can just 
+locc /path/to/your/project
 ```
 
 ## Supported Languages
 
-LOCC supports 90+ programming languages including:
+LOCC a heck ton of programming languages including but not limited to:
 
 - **Systems**: C, C++, Rust, Go
 - **Web**: JavaScript, TypeScript, HTML, CSS, SCSS
@@ -101,18 +65,11 @@ LOCC supports 90+ programming languages including:
 
 LOCC is optimized for speed:
 
-- **Large buffer sizes** for efficient file reading
-- **Byte-level processing** for line counting
-- **Pre-allocated slices** to reduce memory allocations
-- **Smart path handling** without unnecessary string operations
+> todo
 
 ## Releases
 
-New releases are automatically built and published when a new tag is created. Each release includes:
-
-- Pre-built binaries for Linux and Windows (both x86_64 and ARM64)
-- SHA256 checksums for verification
-- Source code archives
+... will have to be setup first with the next minor release
 
 ## Contributing
 
@@ -134,7 +91,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Johannes (Jotrorox) Müller**
 - GitHub: [@jotrorox](https://github.com/jotrorox)
-- Email: [jotrorox@protonmail.com](mailto:jotrorox@protonmail.com)
+- Email: [mail@jotrorox.com](mailto:mail@jotrorox.com)
 
 ---
 

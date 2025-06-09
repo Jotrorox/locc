@@ -93,12 +93,17 @@ fn parseDir(allocator: std.mem.Allocator, path: []const u8, config: *const Confi
                 if (config.shouldIgnorePattern(entry.name)) continue;
 
                 const file_ending = std.fs.path.extension(entry.name);
-                if (file_ending.len != 0) {
-                    const count = tmpMap.get(file_ending) orelse 0;
-                    try tmpMap.put(file_ending, count + 1);
-                } else {
-                    const count = tmpMap.get("no_extension") orelse 0;
-                    try tmpMap.put("no_extension", count + 1);
+                if (file_ending.len == 0) continue;
+
+                const file_ext = if (file_ending.len > 1 and file_ending[0] == '.') file_ending[1..] else file_ending;
+                for (config.file_types) |file_type| {
+                    for (file_type.file_extensions) |ext| {
+                        if (std.mem.eql(u8, file_ext, ext)) {
+                            const count = tmpMap.get(ext) orelse 0;
+                            try tmpMap.put(ext, count + 1);
+                            break;
+                        }
+                    }
                 }
             },
             .directory => {
@@ -109,7 +114,6 @@ fn parseDir(allocator: std.mem.Allocator, path: []const u8, config: *const Confi
                 var subDir = try parseDir(allocator, new_path, config);
                 defer subDir.deinit();
 
-                // Merge the subdirectory results into tmpMap
                 for (subDir.file_count.keys()) |key| {
                     const count = subDir.file_count.get(key) orelse 0;
                     const existing_count = tmpMap.get(key) orelse 0;
@@ -169,10 +173,15 @@ pub fn main() !void {
     var parsedDir = try parseDir(allocator, ".", &config);
     defer parsedDir.deinit();
 
-    std.debug.print("Parsed directory: {s}\n", .{"."});
     std.debug.print("File counts:\n", .{});
-    for (parsedDir.file_count.keys()) |key| {
-        const count = parsedDir.file_count.get(key) orelse 0;
-        std.debug.print("{s}: {d}\n", .{ key, count });
+    for (config.file_types) |file_type| {
+        var total_count: u32 = 0;
+        for (file_type.file_extensions) |ext| {
+            const count = parsedDir.getFileCount(ext);
+            total_count += count;
+        }
+        if (total_count > 0) {
+            std.debug.print("{s}: {d}\n", .{ file_type.display_name, total_count });
+        }
     }
 }

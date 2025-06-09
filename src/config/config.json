@@ -62,5 +62,37 @@
     ".env.development.local",
     ".env.test.local",
     ".env.production.local"
-  ]
+  ],
+  "file_types": {
+    "javascript": ["js", "jsx"],
+    "typescript": ["ts", "tsx"],
+    "python": ["py"],
+    "java": ["java"],
+    "csharp": ["cs"],
+    "c": ["c", "h"],
+    "cpp": ["cpp", "hpp", "cc", "cxx"],
+    "go": ["go"],
+    "ruby": ["rb"],
+    "php": ["php"],
+    "rust": ["rs"],
+    "swift": ["swift"],
+    "kotlin": ["kt", "kts"],
+    "dart": ["dart"],
+    "shell": ["sh", "bash", "zsh"],
+    "html": ["html", "htm"],
+    "css": ["css", "scss", "sass", "less"],
+    "json": ["json"],
+    "yaml": ["yaml", "yml"],
+    "zig": ["zig", "zon"],
+    "xml": ["xml"],
+    "sql": ["sql"],
+    "markdown": ["md", "markdown", "mdx"],
+    "lua": ["lua"],
+    "perl": ["pl"],
+    "haskell": ["hs"],
+    "elixir": ["ex", "exs"],
+    "scala": ["scala"],
+    "clojure": ["clj", "cljs", "cljc"],
+    "groovy": ["groovy"]
+  }
 }
