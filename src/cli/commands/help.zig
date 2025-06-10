@@ -1,5 +1,6 @@
-const Command = @import("../command.zig").Command;
 const std = @import("std");
+
+const Command = @import("../command.zig").Command;
 
 fn run(_: []const []const u8) anyerror!void {
     const stdout = std.io.getStdOut().writer();
@@ -8,7 +9,8 @@ fn run(_: []const []const u8) anyerror!void {
     try stdout.print("Usage: locc [OPTIONS] [PATH]\n\n", .{});
     try stdout.print("Options:\n", .{});
     try stdout.print("  -h, --help      Show this help message\n", .{});
-    try stdout.print("For more information, visit: https://github.com/Jotrorox/locc\n", .{});
+    try stdout.print("  -f, --file-mode Show line counts instead of file counts\n", .{});
+    try stdout.print("\nFor more information, visit: https://github.com/Jotrorox/locc\n", .{});
 }
 
 pub const HelpCommand = Command{

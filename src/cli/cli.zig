@@ -19,6 +19,8 @@ pub const CLI = struct {
         defer p.deinit();
 
         var c = config.CliConfig.initDefault(p.nextValue() orelse @panic("No Programname provided"));
+        var args_list = std.ArrayList([]const u8).init(cli_alloc.allocator());
+        defer args_list.deinit();
 
         while (p.next()) |token| {
             switch (token) {
@@ -26,27 +28,25 @@ pub const CLI = struct {
                     if (flag.isLong("help") or flag.isShort("h")) {
                         c.help = true;
                         return c;
-                    } else if (flag.isLong("verbose") or flag.isShort("v")) {
-                        c.verbose += 1;
-                    } else if (flag.isLong("quiet") or flag.isShort("q")) {
-                        c.verbose -= 1;
+                    } else if (flag.isLong("file-mode") or flag.isShort("f")) {
+                        c.file_mode = true;
                     }
 
                     for (cli.commands) |cmd| {
                         if (flag.isLong(cmd.cli_args.long) or flag.isShort(cmd.cli_args.short)) {
-                            c.args = &[_][]const u8{cmd.name};
-                            try cmd.run(c.args);
+                            try cmd.run(&[_][]const u8{cmd.name});
                             return c;
                         }
                     }
                 },
                 .arg => |arg| {
-                    c.args = &[_][]const u8{arg};
+                    try args_list.append(arg);
                 },
                 .unexpected_value => @panic("Unexpected value in command line arguments"),
             }
         }
 
+        c.args = args_list.items;
         return c;
     }
 };
