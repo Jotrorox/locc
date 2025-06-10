@@ -16,6 +16,7 @@ pub const Application = struct {
     allocator: std.mem.Allocator,
     config: Config,
     program_config: ProgramConfig,
+    cli_args: ?[]const []const u8,
 
     const APP_VERSION = "0.2.0";
 
@@ -45,11 +46,15 @@ pub const Application = struct {
             .allocator = allocator,
             .config = config,
             .program_config = program_config,
+            .cli_args = null,
         };
     }
 
     pub fn deinit(self: *Application) void {
         self.config.deinit(self.allocator);
+        if (self.cli_args) |args| {
+            self.allocator.free(args);
+        }
     }
 
     pub fn run(self: *Application) !void {
@@ -62,7 +67,8 @@ pub const Application = struct {
             .commands = &commands,
         };
 
-        const cli_data = try cli_config.parse();
+        const cli_data = try cli_config.parse(self.allocator);
+        self.cli_args = cli_data.args;
 
         if (cli_data.help) {
             return try display.displayHelp();

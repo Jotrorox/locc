@@ -9,7 +9,7 @@ fn run(_: []const []const u8) anyerror!void {
     try stdout.print("Usage: locc [OPTIONS] [PATH]\n\n", .{});
     try stdout.print("Options:\n", .{});
     try stdout.print("  -h, --help      Show this help message\n", .{});
-    try stdout.print("  -f, --file-mode Show line counts instead of file counts\n", .{});
+    try stdout.print("  -f, --file-mode Show file counts instead of line counts\n", .{});
     try stdout.print("\nFor more information, visit: https://github.com/Jotrorox/locc\n", .{});
 }
 

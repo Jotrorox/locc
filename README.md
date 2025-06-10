@@ -29,10 +29,11 @@ zig build --release=small
 
 Count lines of code in a directory, grouped by file type:
 
-> This will be implemented soon again
-
 ```bash
-# todo
+# To run in the current folder
+locc
+# To run in a specific folder
+locc /path/to/your/project
 ```
 
 ### File Mode
@@ -43,9 +44,6 @@ Show the file count, grouped by file type:
 locc --file-mode /path/to/your/project
 # or
 locc -f /path/to/your/project
-
-# But since it is the default currently you can just 
-locc /path/to/your/project
 ```
 
 ## Supported Languages

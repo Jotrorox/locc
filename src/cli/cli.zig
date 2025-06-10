@@ -8,19 +8,12 @@ pub const CLI = struct {
     pConfig: programConfig.ProgramConfig,
     commands: []const command.Command,
 
-    pub fn parse(cli: CLI) anyerror!config.CliConfig {
-        var cli_alloc = std.heap.GeneralPurposeAllocator(.{}){};
-        defer {
-            const check = cli_alloc.deinit();
-            if (check == .leak) @panic("Memory leak detected");
-        }
-
-        var p = try parser.parseProcess(cli_alloc.allocator(), .{});
+    pub fn parse(cli: CLI, allocator: std.mem.Allocator) anyerror!config.CliConfig {
+        var p = try parser.parseProcess(allocator, .{});
         defer p.deinit();
 
         var c = config.CliConfig.initDefault(p.nextValue() orelse @panic("No Programname provided"));
-        var args_list = std.ArrayList([]const u8).init(cli_alloc.allocator());
-        defer args_list.deinit();
+        var args_list = std.ArrayList([]const u8).init(allocator);
 
         while (p.next()) |token| {
             switch (token) {
@@ -46,7 +39,8 @@ pub const CLI = struct {
             }
         }
 
-        c.args = args_list.items;
+        // Convert ArrayList to owned slice
+        c.args = try args_list.toOwnedSlice();
         return c;
     }
 };

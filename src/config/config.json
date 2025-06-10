@@ -93,6 +93,21 @@
     "elixir": ["ex", "exs"],
     "scala": ["scala"],
     "clojure": ["clj", "cljs", "cljc"],
-    "groovy": ["groovy"]
+    "groovy": ["groovy"],
+    "objective-c": ["m", "mm"],
+    "powershell": ["ps1", "psm1", "psd1"],
+    "r": ["r"],
+    "julia": ["jl"],
+    "vue": ["vue"],
+    "svelte": ["svelte"],
+    "elm": ["elm"],
+    "crystal": ["cr"],
+    "ocaml": ["ml", "mli"],
+    "fsharp": ["fs", "fsi", "fsx"],
+    "scheme": ["scm", "ss"],
+    "tcl": ["tcl"],
+    "fortran": ["f", "for", "f90", "f95"],
+    "assembly": ["asm", "s"],
+    "cuda": ["cu", "cuh"]
   }
 }
