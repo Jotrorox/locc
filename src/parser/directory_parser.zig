@@ -80,7 +80,7 @@ pub const ParsedDirectory = struct {
     }
 };
 
-pub fn parseDirectory(allocator: std.mem.Allocator, path: []const u8, config: *const Config) !ParsedDirectory {
+pub fn parseDirectory(allocator: std.mem.Allocator, path: []const u8, config: *const Config, pattern: ?[]const u8) !ParsedDirectory {
     var dir = try std.fs.cwd().openDir(path, .{ .iterate = true });
 
     var tmpFileMap = StringArrayHashMap(u32).init(allocator);
@@ -93,6 +93,10 @@ pub fn parseDirectory(allocator: std.mem.Allocator, path: []const u8, config: *c
 
     var iterator = dir.iterate();
     while (try iterator.next()) |entry| {
+        // Apply optional pattern filter if provided (supports simple wildcards)
+        if (pattern) |patt| {
+            if (!matchesPattern(entry.name, patt)) continue;
+        }
         switch (entry.kind) {
             .file => {
                 if (config.shouldIgnorePattern(entry.name)) continue;
@@ -129,7 +133,7 @@ pub fn parseDirectory(allocator: std.mem.Allocator, path: []const u8, config: *c
 
                 const new_path = try std.fmt.allocPrint(allocator, "{s}/{s}", .{ path, entry.name });
                 defer allocator.free(new_path);
-                var subDir = try parseDirectory(allocator, new_path, config);
+                var subDir = try parseDirectory(allocator, new_path, config, pattern);
                 defer subDir.deinit();
 
                 // Merge file counts
@@ -151,4 +155,52 @@ pub fn parseDirectory(allocator: std.mem.Allocator, path: []const u8, config: *c
     }
 
     return ParsedDirectory.initWithCount(allocator, dir, tmpFileMap, tmpLineMap);
+}
+
+// Simple pattern matching function that supports basic wildcards
+// Supports: *, ? wildcards and exact matches
+fn matchesPattern(name: []const u8, pattern: []const u8) bool {
+    return matchesPatternRecursive(name, pattern, 0, 0);
+}
+
+fn matchesPatternRecursive(name: []const u8, pattern: []const u8, name_idx: usize, pattern_idx: usize) bool {
+    // If we've reached the end of both strings, it's a match
+    if (name_idx == name.len and pattern_idx == pattern.len) {
+        return true;
+    }
+
+    // If we've reached the end of the pattern but not the name, no match
+    if (pattern_idx == pattern.len) {
+        return false;
+    }
+
+    // If we've reached the end of the name but not the pattern,
+    // only match if remaining pattern is all '*'
+    if (name_idx == name.len) {
+        for (pattern[pattern_idx..]) |c| {
+            if (c != '*') return false;
+        }
+        return true;
+    }
+
+    const current_pattern = pattern[pattern_idx];
+    const current_name = name[name_idx];
+
+    if (current_pattern == '*') {
+        // Try matching zero characters (skip the *)
+        if (matchesPatternRecursive(name, pattern, name_idx, pattern_idx + 1)) {
+            return true;
+        }
+        // Try matching one character and keep the *
+        return matchesPatternRecursive(name, pattern, name_idx + 1, pattern_idx);
+    } else if (current_pattern == '?') {
+        // ? matches any single character
+        return matchesPatternRecursive(name, pattern, name_idx + 1, pattern_idx + 1);
+    } else {
+        // Exact character match
+        if (current_name == current_pattern) {
+            return matchesPatternRecursive(name, pattern, name_idx + 1, pattern_idx + 1);
+        }
+        return false;
+    }
 }

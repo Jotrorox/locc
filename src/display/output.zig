@@ -222,15 +222,18 @@ pub fn displayHelp() !void {
     try stdout.print("{s}{s}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━{s}\n", .{ Colors.bright_black, Colors.dim, Colors.reset });
     try stdout.print("  {s}{s}-h{s}, {s}{s}--help{s}      {s}Show this help message{s}\n", .{ Colors.bright_green, Colors.bold, Colors.reset, Colors.bright_green, Colors.bold, Colors.reset, Colors.bright_white, Colors.reset });
     try stdout.print("  {s}{s}-f{s}, {s}{s}--file-mode{s} {s}Show file counts instead of line counts{s}\n", .{ Colors.bright_green, Colors.bold, Colors.reset, Colors.bright_green, Colors.bold, Colors.reset, Colors.bright_white, Colors.reset });
+    try stdout.print("  {s}{s}-r{s}, {s}{s}--regex{s}     {s}Filter files and directories using pattern (supports *, ?){s}\n", .{ Colors.bright_green, Colors.bold, Colors.reset, Colors.bright_green, Colors.bold, Colors.reset, Colors.bright_white, Colors.reset });
 
     try stdout.print("\n", .{});
 
     // Examples section
     try stdout.print("{s}{s}{s} Examples{s}\n", .{ Symbols.check_mark, Colors.bright_blue, Colors.bold, Colors.reset });
     try stdout.print("{s}{s}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━{s}\n", .{ Colors.bright_black, Colors.dim, Colors.reset });
-    try stdout.print("  {s}{s}locc{s}                    {s}{s}Count lines in current directory{s}\n", .{ Colors.bright_cyan, Colors.bold, Colors.reset, Colors.bright_black, Colors.dim, Colors.reset });
-    try stdout.print("  {s}{s}locc /path/to/project{s}   {s}{s}Count lines in specific directory{s}\n", .{ Colors.bright_cyan, Colors.bold, Colors.reset, Colors.bright_black, Colors.dim, Colors.reset });
-    try stdout.print("  {s}{s}locc --file-mode{s}        {s}{s}Show file counts instead of lines{s}\n", .{ Colors.bright_cyan, Colors.bold, Colors.reset, Colors.bright_black, Colors.dim, Colors.reset });
+    try stdout.print("  {s}{s}locc{s}                       {s}{s}Count lines in current directory{s}\n", .{ Colors.bright_cyan, Colors.bold, Colors.reset, Colors.bright_black, Colors.dim, Colors.reset });
+    try stdout.print("  {s}{s}locc /path/to/project{s}      {s}{s}Count lines in specific directory{s}\n", .{ Colors.bright_cyan, Colors.bold, Colors.reset, Colors.bright_black, Colors.dim, Colors.reset });
+    try stdout.print("  {s}{s}locc --file-mode{s}           {s}{s}Show file counts instead of lines{s}\n", .{ Colors.bright_cyan, Colors.bold, Colors.reset, Colors.bright_black, Colors.dim, Colors.reset });
+    try stdout.print("  {s}{s}locc -r \"*.js\"{s}           {s}{s}Count only JavaScript files{s}\n", .{ Colors.bright_cyan, Colors.bold, Colors.reset, Colors.bright_black, Colors.dim, Colors.reset });
+    try stdout.print("  {s}{s}locc -f -r \"*.md\"{s}        {s}{s}Show markdown file counts{s}\n", .{ Colors.bright_cyan, Colors.bold, Colors.reset, Colors.bright_black, Colors.dim, Colors.reset });
 
     try stdout.print("\n", .{});
 

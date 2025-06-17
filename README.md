@@ -11,6 +11,7 @@ A fast and beautiful command-line tool for counting lines of code across multipl
 - :art: **Beautiful Output**: Colorful and easy-to-read terminal output
 - :file_folder: **Multi-language Support**: Counts lines for a wide range of programming languages
 - :bar_chart: **File Mode**: Show file counts grouped by type
+- :mag: **Pattern Filtering**: Filter files using wildcards (* and ?) for precise control
 - :gear: **Configurable**: Easily ignore directories and files with a JSON configuration file
 
 ## Installation
@@ -49,6 +50,39 @@ locc --file-mode /path/to/your/project
 # or
 locc -f /path/to/your/project
 ```
+
+### Pattern Filtering
+
+Filter files and directories using patterns with wildcards:
+
+```bash
+# Count only Zig files
+locc -r "*.zig" /path/to/project
+
+# Count only markdown files in file mode
+locc -f -r "*.md" /path/to/project
+
+# Count files with specific naming patterns
+locc -r "test*.py" ./python-project
+locc -r "*component*" ./react-app
+
+# Use single character wildcard
+locc -r "build.zi?" ./zig-project
+```
+
+### Pattern Syntax
+
+The `-r`/`--regex` option supports simple wildcard patterns:
+- `*` matches any sequence of characters (including none)
+- `?` matches any single character
+- Literal characters match exactly
+
+Examples:
+- `*.js` - matches all JavaScript files (main.js, app.js, etc.)
+- `test*.py` - matches Python files starting with "test" (test_main.py, test_utils.py)
+- `*component*.vue` - matches Vue files with "component" in the name
+- `build.zi?` - matches files like build.zig, build.zip, etc.
+- `*.{js,ts}` - Note: this requires shell expansion, use separate commands for multiple extensions
 
 ## Supported Languages
 

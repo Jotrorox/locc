@@ -84,8 +84,9 @@ pub const Application = struct {
 
         // Parse the directory (default to current directory)
         const target_path = if (cli_data.args.len > 0) cli_data.args[0] else ".";
-
-        var parsed_dir = try directory_parser.parseDirectory(self.allocator, target_path, &self.config);
+        // Optional substring filter
+        const pattern = cli_data.regex;
+        var parsed_dir = try directory_parser.parseDirectory(self.allocator, target_path, &self.config, pattern);
         defer parsed_dir.deinit();
 
         // Display results

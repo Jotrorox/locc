@@ -23,6 +23,10 @@ pub const CLI = struct {
                         return c;
                     } else if (flag.isLong("file-mode") or flag.isShort("f")) {
                         c.file_mode = true;
+                    } else if (flag.isLong("regex") or flag.isShort("r")) {
+                        // Optional regex filter for file and directory names
+                        const pattern = p.nextValue() orelse @panic("Missing regex pattern");
+                        c.regex = pattern;
                     }
 
                     for (cli.commands) |cmd| {
