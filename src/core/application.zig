@@ -39,6 +39,14 @@ pub const Application = struct {
                     std.debug.print("Error: Out of memory while loading config\n", .{});
                     return err;
                 },
+                ConfigError.ConfigFileError => {
+                    std.debug.print("Error: Failed to read config file\n", .{});
+                    return err;
+                },
+                ConfigError.XdgError => {
+                    std.debug.print("Error: Could not determine XDG config directory\n", .{});
+                    return err;
+                },
             }
         };
 

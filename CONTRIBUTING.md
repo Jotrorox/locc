@@ -39,38 +39,27 @@ We'd love to hear your ideas! When suggesting features:
 
 #### Development Setup
 
-1. **Install Go 1.24+** (check with `go version`)
-2. **Install dependencies**:
+1. **Install Zig 0.14.1+** (check with `zig version`)
+2. **Build and test**:
    ```bash
-   go mod download
-   ```
-3. **Build and test**:
-   ```bash
-   go build -o locc main.go
-   ./locc .
+   zig build --release=small
+   ./zig-out/bin/locc
    ```
 
 #### Making Changes
 
-1. **Follow Go conventions**:
-   - Use `gofmt` to format your code
-   - Run `go vet` to check for issues
-   - Write clear, descriptive variable and function names
-   - Add comments for exported functions and complex logic
-
-2. **Test your changes**:
+1. **Test your changes**:
    - Test with various file types and directory structures
    - Ensure both file mode (`-f`) and type mode work correctly
    - Test error handling with invalid paths or permissions
 
-3. **Keep commits focused**:
+2. **Keep commits focused**:
    - One logical change per commit
    - Write clear commit messages
    - Use present tense ("Add feature" not "Added feature")
 
 #### Code Style
 
-- Follow standard Go formatting (`gofmt`)
 - Use meaningful variable names
 - Keep functions focused and reasonably sized
 - Add comments for exported functions
@@ -100,7 +89,7 @@ LOCC prioritizes performance. When contributing:
 
 To add support for a new programming language:
 
-1. **Add the file extension** to `fileTypeMap` in `main.go`
+1. **Add the file extension** to `fileTypes` in `src/config/config.json`
 2. **Use a descriptive language name** (e.g., "TypeScript" not "TS")
 3. **Test with real files** of that language type
 4. **Update the README** to include the new language in the supported list
@@ -120,7 +109,8 @@ Example:
 
 #### Compatibility
 - Ensure changes work on Linux, macOS, and Windows
-- Support Go 1.24+
+- Support Zig 0.14.1+ for building
+- Use standard libraries and avoid platform-specific code unless necessary
 - Maintain backward compatibility for command-line flags
 
 #### Testing

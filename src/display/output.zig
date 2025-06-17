@@ -80,7 +80,7 @@ pub fn displayResults(config: *const Config, parsed_dir: *const ParsedDirectory,
 fn displayHeader(writer: anytype) !void {
     try writer.print("\n", .{});
     try writer.print("{s}{s}┌─────────────────────────────────────────────────────────────┐{s}\n", .{ Colors.bright_cyan, Colors.bold, Colors.reset });
-    try writer.print("{s}{s}│  {s}{s} LOCC - Lines of Code Counter {s}{s}                     │{s}\n", .{ Colors.bright_cyan, Colors.bold, Symbols.code_icon, Colors.bright_white, Colors.bright_cyan, Colors.bold, Colors.reset });
+    try writer.print("{s}{s}│  {s}{s} LOCC - Lines of Code Counter {s}{s}                           │{s}\n", .{ Colors.bright_cyan, Colors.bold, Symbols.code_icon, Colors.bright_white, Colors.bright_cyan, Colors.bold, Colors.reset });
     try writer.print("{s}{s}└─────────────────────────────────────────────────────────────┘{s}\n", .{ Colors.bright_cyan, Colors.bold, Colors.reset });
     try writer.print("\n", .{});
 }
@@ -111,7 +111,7 @@ fn displayFileMode(config: *const Config, parsed_dir: *const ParsedDirectory) vo
 
     if (has_files) {
         stdout.print("\n{s}{s}┌─────────────────────────────────────┐{s}\n", .{ Colors.bright_green, Colors.bold, Colors.reset }) catch return;
-        stdout.print("{s}{s}│  {s} Total Files: {s}{d:>6}{s}           │{s}\n", .{ Colors.bright_green, Colors.bold, Symbols.total_icon, Colors.bright_white, total_files, Colors.bright_green, Colors.reset }) catch return;
+        stdout.print("{s}{s}│  {s} Total Files: {s}{d:>6}{s}             │{s}\n", .{ Colors.bright_green, Colors.bold, Symbols.total_icon, Colors.bright_white, total_files, Colors.bright_green, Colors.reset }) catch return;
         stdout.print("{s}{s}└─────────────────────────────────────┘{s}\n", .{ Colors.bright_green, Colors.bold, Colors.reset }) catch return;
     } else {
         stdout.print("  {s}{s}No files found matching configured patterns{s}\n", .{ Colors.bright_black, Colors.dim, Colors.reset }) catch return;
@@ -190,7 +190,7 @@ fn displayLineMode(config: *const Config, parsed_dir: *const ParsedDirectory) vo
         defer if (!std.mem.eql(u8, formatted_total_files, "0")) allocator.free(formatted_total_files);
 
         stdout.print("\n{s}{s}┌─────────────────────────────────────────────────────────┐{s}\n", .{ Colors.bright_magenta, Colors.bold, Colors.reset }) catch return;
-        stdout.print("{s}{s}│  {s} Total: {s}{s:>8}{s} lines in {s}{s:>6}{s} files        │{s}\n", .{ Colors.bright_magenta, Colors.bold, Symbols.total_icon, Colors.bright_white, formatted_total_lines, Colors.bright_magenta, Colors.bright_white, formatted_total_files, Colors.bright_magenta, Colors.reset }) catch return;
+        stdout.print("{s}{s}│  {s} Total: {s}{s:>8}{s} lines in {s}{s:>6}{s} files               │{s}\n", .{ Colors.bright_magenta, Colors.bold, Symbols.total_icon, Colors.bright_white, formatted_total_lines, Colors.bright_magenta, Colors.bright_white, formatted_total_files, Colors.bright_magenta, Colors.reset }) catch return;
         stdout.print("{s}{s}└─────────────────────────────────────────────────────────┘{s}\n", .{ Colors.bright_magenta, Colors.bold, Colors.reset }) catch return;
     } else {
         stdout.print("  {s}{s}No code files found matching configured patterns{s}\n", .{ Colors.bright_black, Colors.dim, Colors.reset }) catch return;
@@ -205,8 +205,8 @@ pub fn displayHelp() !void {
     // Header with logo
     try stdout.print("\n", .{});
     try stdout.print("{s}{s}┌─────────────────────────────────────────────────────────────┐{s}\n", .{ Colors.bright_cyan, Colors.bold, Colors.reset });
-    try stdout.print("{s}{s}│  {s}{s} LOCC - A Better Lines of Code Counter {s}{s}              │{s}\n", .{ Colors.bright_cyan, Colors.bold, Symbols.code_icon, Colors.bright_white, Colors.bright_cyan, Colors.bold, Colors.reset });
-    try stdout.print("{s}{s}│  {s}{s}Version 0.2.0{s}{s}                                         │{s}\n", .{ Colors.bright_cyan, Colors.bold, Colors.bright_black, Colors.dim, Colors.bright_cyan, Colors.bold, Colors.reset });
+    try stdout.print("{s}{s}│  {s}{s} LOCC - A Better Lines of Code Counter {s}{s}                  │{s}\n", .{ Colors.bright_cyan, Colors.bold, Symbols.code_icon, Colors.bright_white, Colors.bright_cyan, Colors.bold, Colors.reset });
+    try stdout.print("{s}{s}│  {s}{s}Version 0.2.0{s}{s}                                              │{s}\n", .{ Colors.bright_cyan, Colors.bold, Colors.bright_black, Colors.dim, Colors.bright_cyan, Colors.bold, Colors.reset });
     try stdout.print("{s}{s}└─────────────────────────────────────────────────────────────┘{s}\n", .{ Colors.bright_cyan, Colors.bold, Colors.reset });
 
     try stdout.print("\n", .{});

@@ -6,6 +6,8 @@ pub const ConfigError = error{
     MissingIgnoredPaths,
     InvalidJson,
     OutOfMemory,
+    ConfigFileError,
+    XdgError,
 };
 
 pub const FileType = struct {
@@ -18,11 +20,7 @@ pub const Config = struct {
     file_types: []FileType,
 
     pub fn init(allocator: std.mem.Allocator) ConfigError!Config {
-        return loadConfig(allocator) catch |err| switch (err) {
-            error.OutOfMemory => ConfigError.OutOfMemory,
-            error.MissingIgnoredPaths => ConfigError.MissingIgnoredPaths,
-            else => ConfigError.InvalidJson,
-        };
+        return initWithUserConfig(allocator);
     }
 
     pub fn deinit(self: *Config, allocator: std.mem.Allocator) void {
@@ -31,7 +29,7 @@ pub const Config = struct {
             allocator.free(path);
         }
         allocator.free(self.ignored_paths);
-        
+
         // Free file_types and their extensions
         for (self.file_types) |file_type| {
             allocator.free(file_type.display_name);
@@ -68,17 +66,110 @@ pub const Config = struct {
     }
 };
 
-fn loadConfig(allocator: std.mem.Allocator) !Config {
-    const parsed = std.json.parseFromSlice(std.json.Value, allocator, config_json, .{}) catch {
-        std.debug.print("Error: Failed to parse embedded config.json\n", .{});
-        return error.InvalidJson;
+fn initWithUserConfig(allocator: std.mem.Allocator) ConfigError!Config {
+    // Get XDG config directory
+    const xdg_config_dir = getXdgConfigDir(allocator) catch {
+        std.debug.print("Warning: Could not get XDG config directory, using embedded config\n", .{});
+        return loadConfig(allocator);
+    };
+    defer allocator.free(xdg_config_dir);
+
+    // Create locc config directory path
+    const locc_config_dir = std.fs.path.join(allocator, &[_][]const u8{ xdg_config_dir, "locc" }) catch {
+        std.debug.print("Warning: Could not create config directory path, using embedded config\n", .{});
+        return loadConfig(allocator);
+    };
+    defer allocator.free(locc_config_dir);
+
+    // Create user config file path
+    const user_config_path = std.fs.path.join(allocator, &[_][]const u8{ locc_config_dir, "config.json" }) catch {
+        std.debug.print("Warning: Could not create config file path, using embedded config\n", .{});
+        return loadConfig(allocator);
+    };
+    defer allocator.free(user_config_path);
+
+    // Check if user config exists, if not create it
+    if (!std.fs.path.isAbsolute(user_config_path)) {
+        std.debug.print("Error: Invalid config path\n", .{});
+        return loadConfig(allocator);
+    }
+
+    std.fs.accessAbsolute(user_config_path, .{}) catch {
+        // Config doesn't exist, create it
+        createUserConfig(locc_config_dir, user_config_path) catch {
+            std.debug.print("Warning: Could not create user config file, using embedded config\n", .{});
+            return loadConfig(allocator);
+        };
+    };
+
+    // Load user config
+    return loadUserConfig(allocator, user_config_path) catch {
+        std.debug.print("Warning: Could not load user config, using embedded config\n", .{});
+        return loadConfig(allocator);
+    };
+}
+
+fn getXdgConfigDir(allocator: std.mem.Allocator) ConfigError![]u8 {
+    // Try XDG_CONFIG_HOME first
+    if (std.posix.getenv("XDG_CONFIG_HOME")) |xdg_config_home| {
+        return allocator.dupe(u8, xdg_config_home) catch ConfigError.OutOfMemory;
+    }
+
+    // Fallback to $HOME/.config
+    const home = std.posix.getenv("HOME") orelse return ConfigError.XdgError;
+    return std.fs.path.join(allocator, &[_][]const u8{ home, ".config" }) catch ConfigError.OutOfMemory;
+}
+
+fn createUserConfig(config_dir: []const u8, config_path: []const u8) ConfigError!void {
+    // Create the directory if it doesn't exist
+    std.fs.makeDirAbsolute(config_dir) catch |err| switch (err) {
+        error.PathAlreadyExists => {}, // Directory already exists, that's fine
+        else => return ConfigError.ConfigFileError,
+    };
+
+    // Write the embedded config to the user config file
+    const file = std.fs.createFileAbsolute(config_path, .{}) catch {
+        return ConfigError.ConfigFileError;
+    };
+    defer file.close();
+
+    file.writeAll(config_json) catch {
+        return ConfigError.ConfigFileError;
+    };
+
+    std.debug.print("Created user config file at: {s}\n", .{config_path});
+}
+
+fn loadConfig(allocator: std.mem.Allocator) ConfigError!Config {
+    return parseConfigFromJson(allocator, config_json);
+}
+
+fn loadUserConfig(allocator: std.mem.Allocator, config_path: []const u8) ConfigError!Config {
+    const file = std.fs.openFileAbsolute(config_path, .{}) catch {
+        return ConfigError.ConfigFileError;
+    };
+    defer file.close();
+
+    const file_size = file.getEndPos() catch return ConfigError.ConfigFileError;
+    const contents = allocator.alloc(u8, file_size) catch return ConfigError.OutOfMemory;
+    defer allocator.free(contents);
+
+    _ = file.readAll(contents) catch return ConfigError.ConfigFileError;
+
+    return parseConfigFromJson(allocator, contents);
+}
+
+fn parseConfigFromJson(allocator: std.mem.Allocator, json_content: []const u8) ConfigError!Config {
+    const parsed = std.json.parseFromSlice(std.json.Value, allocator, json_content, .{}) catch {
+        std.debug.print("Error: Failed to parse config JSON\n", .{});
+        return ConfigError.InvalidJson;
     };
     defer parsed.deinit();
 
     const root = parsed.value;
     const ignored_paths_json = root.object.get("ignored_paths") orelse {
-        std.debug.print("Error: 'ignored_paths' field missing from config.json\n", .{});
-        return error.MissingIgnoredPaths;
+        std.debug.print("Error: 'ignored_paths' field missing from config\n", .{});
+        return ConfigError.MissingIgnoredPaths;
     };
 
     var ignored_paths = std.ArrayList([]const u8).init(allocator);
@@ -92,22 +183,22 @@ fn loadConfig(allocator: std.mem.Allocator) !Config {
     for (ignored_paths_json.array.items) |item| {
         const path = allocator.dupe(u8, item.string) catch {
             std.debug.print("Error: Failed to allocate memory for path: {s}\n", .{item.string});
-            return error.OutOfMemory;
+            return ConfigError.OutOfMemory;
         };
         ignored_paths.append(path) catch {
             allocator.free(path);
-            return error.OutOfMemory;
+            return ConfigError.OutOfMemory;
         };
     }
 
     const file_types_json = root.object.get("file_types") orelse {
-        std.debug.print("Warning: 'file_types' field missing from config.json, using empty list\n", .{});
+        std.debug.print("Warning: 'file_types' field missing from config, using empty list\n", .{});
         return Config{
-            .ignored_paths = ignored_paths.toOwnedSlice() catch return error.OutOfMemory,
+            .ignored_paths = ignored_paths.toOwnedSlice() catch return ConfigError.OutOfMemory,
             .file_types = &[_]FileType{},
         };
     };
-    
+
     var file_types = std.ArrayList(FileType).init(allocator);
     errdefer {
         for (file_types.items) |file_type| {
@@ -119,22 +210,22 @@ fn loadConfig(allocator: std.mem.Allocator) !Config {
         }
         file_types.deinit();
     }
-    
+
     // Iterate over the object entries instead of array items
     var iterator = file_types_json.object.iterator();
     while (iterator.next()) |entry| {
         const display_name_src = entry.key_ptr.*;
         const extensions_json = entry.value_ptr.*;
-        
+
         if (extensions_json != .array) {
             std.debug.print("Error: file extensions for '{s}' should be an array\n", .{display_name_src});
-            return error.InvalidJson;
+            return ConfigError.InvalidJson;
         }
 
         // Duplicate the display name since JSON memory will be freed
         const display_name = allocator.dupe(u8, display_name_src) catch {
             std.debug.print("Error: Failed to allocate memory for display name: {s}\n", .{display_name_src});
-            return error.OutOfMemory;
+            return ConfigError.OutOfMemory;
         };
         errdefer allocator.free(display_name);
 
@@ -149,24 +240,24 @@ fn loadConfig(allocator: std.mem.Allocator) !Config {
         for (extensions_json.array.items) |ext_item| {
             const ext = allocator.dupe(u8, ext_item.string) catch {
                 std.debug.print("Error: Failed to allocate memory for file extension: {s}\n", .{ext_item.string});
-                return error.OutOfMemory;
+                return ConfigError.OutOfMemory;
             };
             extensions.append(ext) catch {
                 allocator.free(ext);
-                return error.OutOfMemory;
+                return ConfigError.OutOfMemory;
             };
         }
 
         const file_type = FileType{
             .display_name = display_name,
-            .file_extensions = extensions.toOwnedSlice() catch return error.OutOfMemory,
+            .file_extensions = extensions.toOwnedSlice() catch return ConfigError.OutOfMemory,
         };
-        file_types.append(file_type) catch return error.OutOfMemory;
+        file_types.append(file_type) catch return ConfigError.OutOfMemory;
     }
-    
+
     const config = Config{
-        .ignored_paths = ignored_paths.toOwnedSlice() catch return error.OutOfMemory,
-        .file_types = file_types.toOwnedSlice() catch return error.OutOfMemory,
+        .ignored_paths = ignored_paths.toOwnedSlice() catch return ConfigError.OutOfMemory,
+        .file_types = file_types.toOwnedSlice() catch return ConfigError.OutOfMemory,
     };
 
     return config;

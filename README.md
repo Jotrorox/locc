@@ -7,7 +7,11 @@ A fast and beautiful command-line tool for counting lines of code across multipl
 
 ## Features
 
-> Written in zig ... but just kidding this will be filled out soon :)
+- :zap: **Fast**: Optimized for speed, written in Zig
+- :art: **Beautiful Output**: Colorful and easy-to-read terminal output
+- :file_folder: **Multi-language Support**: Counts lines for a wide range of programming languages
+- :bar_chart: **File Mode**: Show file counts grouped by type
+- :gear: **Configurable**: Easily ignore directories and files with a JSON configuration file
 
 ## Installation
 
@@ -63,11 +67,14 @@ LOCC a heck ton of programming languages including but not limited to:
 
 LOCC is optimized for speed:
 
-> todo
+- :zap: Written in Zig for high performance
+- :rocket: Fast parsing and counting algorithms
+- :bar_chart: Efficient memory usage
+- :tada: Handles large repositories with ease
 
 ## Releases
 
-... will have to be setup first with the next minor release
+... will have to be setup first with the next minor release 
 
 ## Contributing
 
