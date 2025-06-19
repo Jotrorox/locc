@@ -1,0 +1,33 @@
+# Node modules
+node_modules/
+
+# Bun cache
+.bun/
+
+# Svelte build output
+build/
+dist/
+.svelte-kit/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment files
+.env
+.env.*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Bun lockfile (optional, if you want to ignore it)
+# bun.lockb

@@ -245,13 +245,13 @@ pub fn displayHelp() !void {
 // Helper function to get color for different file types
 fn getFileTypeColor(file_type: []const u8) []const u8 {
     // Convert to lowercase for comparison
-    var lowercase_buf: [32]u8 = undefined;
-    const lowercase = if (file_type.len < lowercase_buf.len) blk: {
-        for (file_type, 0..) |c, i| {
-            lowercase_buf[i] = std.ascii.toLower(c);
-        }
-        break :blk lowercase_buf[0..file_type.len];
-    } else file_type;
+    const allocator = std.heap.page_allocator;
+    const lowercase_buf = try allocator.alloc(u8, file_type.len);
+    defer allocator.free(lowercase_buf);
+    for (file_type, 0..) |c, i| {
+        lowercase_buf[i] = std.ascii.toLower(c);
+    }
+    const lowercase = lowercase_buf[0..file_type.len];
 
     if (std.mem.eql(u8, lowercase, "zig")) return Colors.bright_yellow;
     if (std.mem.eql(u8, lowercase, "c") or std.mem.eql(u8, lowercase, "c++")) return Colors.blue;

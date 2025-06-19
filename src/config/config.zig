@@ -227,7 +227,8 @@ fn parseConfigFromJson(allocator: std.mem.Allocator, json_content: []const u8) C
             std.debug.print("Error: Failed to allocate memory for display name: {s}\n", .{display_name_src});
             return ConfigError.OutOfMemory;
         };
-        errdefer allocator.free(display_name);
+        var display_name_freed = false;
+        errdefer if (!display_name_freed) allocator.free(display_name);
 
         var extensions = std.ArrayList([]const u8).init(allocator);
         errdefer {
@@ -252,6 +253,7 @@ fn parseConfigFromJson(allocator: std.mem.Allocator, json_content: []const u8) C
             .display_name = display_name,
             .file_extensions = extensions.toOwnedSlice() catch return ConfigError.OutOfMemory,
         };
+        display_name_freed = true;
         file_types.append(file_type) catch return ConfigError.OutOfMemory;
     }
 
